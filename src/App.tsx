@@ -470,14 +470,43 @@ export default function App() {
                       推测评分模型明细
                     </h4>
                     <div className="grid grid-cols-1 gap-4">
-                      {selectedEnterprise.reasons.map((reason, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-5 bg-gray-50 rounded-[24px] border border-gray-100">
-                          <span className="text-sm font-bold text-gray-700">{reason.split(':')[0]}</span>
-                          <span className="font-mono font-bold text-blue-600 bg-white px-4 py-1 rounded-full shadow-sm border border-gray-100">
-                            {reason.split(':')[1] || "满足"}
-                          </span>
-                        </div>
-                      ))}
+                      {selectedEnterprise.reasons.map((reason, idx) => {
+                        const [label, scorePart] = reason.split(':');
+                        const score = scorePart ? parseInt(scorePart.trim()) : (reason.includes('满足') && !reason.includes('不满足') ? 45 : 0);
+                        
+                        let description = "";
+                        if (label.includes('基础')) {
+                          description = score === 45 
+                            ? "合规性极佳。企业在嘉兴本地稳健经营，无任何违法违规记录，守住了认定的“第一道防线”。" 
+                            : "合规性存在硬伤。企业可能涉及经营异常、严重失信或非本地注册，需优先解决合规问题。";
+                        } else if (label.includes('规模')) {
+                          description = score >= 15 
+                            ? "规模高度适配。企业注册资本与组织架构完全符合中小微定义，是政策重点扶持的“轻骑兵”。" 
+                            : score >= 10 
+                            ? "规模基本达标。处于典型的成长期，各项规模指标均在认定红线之内。" 
+                            : "规模存在超标风险。企业注册资本较大或属于分支机构，需核实是否符合中小微划型标准。";
+                        } else if (label.includes('科创')) {
+                          description = score >= 25 
+                            ? "科创基因深厚。从名称到经营范围均体现了强烈的研发导向，且已有知识产权沉淀，达标概率极高。" 
+                            : score >= 15 
+                            ? "科创倾向良好。企业已跨入科技赛道，但在知识产权储备或行业精准度上仍有优化空间。" 
+                            : "科创倾向待挖掘。目前主要经营基础业务，需通过调整经营范围或布局知识产权来“点亮”科创属性。";
+                        }
+
+                        return (
+                          <div key={idx} className="p-6 bg-gray-50 rounded-[28px] border border-gray-100 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-bold text-gray-700">{label}</span>
+                              <span className="font-mono font-bold text-blue-600 bg-white px-4 py-1 rounded-full shadow-sm border border-gray-100">
+                                {scorePart ? scorePart.trim() : (score === 45 ? "45/45" : "0/45")}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 leading-relaxed">
+                              {description}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </section>
 
